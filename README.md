@@ -7,7 +7,8 @@ The store is an in-memory store of Books referenced by the book reference.
 ***
 
 1. Install Node.js (lts-version v16.15.1)
-2. cd into Project root directory 
+2. cd into Project root directory
+3. run `npm install` 
 3. run `npm start`
 4. test the endpoints with postman 
 
