@@ -1,0 +1,79 @@
+name: Build
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Install Node.js ${{ matrix.node-version }}
+        shell: bash -eo pipefail -l {0}
+        run: |
+          nvm install --default 16.15.1
+          dirname "$(nvm which 16.15.1)" >> "$GITHUB_PATH"
+          
+      - name: Configure npm
+        run: |
+          npm config set loglevel error
+          
+      - name: Setup Node.js version-specific dependencies
+        shell: bash
+        run: |
+          # eslint for linting
+          # - remove on Node.js < 12
+          if [[ "$(cut -d. -f1 <<< "16.15.1")" -lt 12 ]]; then
+            node -pe 'Object.keys(require("./package").devDependencies).join("\n")' | \
+              grep -E '^eslint(-|$)' | \
+              sort -r | \
+              xargs -n1 npm rm --silent --save-dev
+          fi
+       
+      - name: Install Node.js dependencies
+        run: npm install
+        
+      - name: List environment
+        id: list_env
+        shell: bash
+        run: |
+          echo "node@$(node -v)"
+          echo "npm@$(npm -v)"
+          npm -s ls ||:
+          (npm -s ls --depth=0 ||:) | awk -F'[ @]' 'NR>1 && $2 { print "::set-output name=" $2 "::" $3 }'  
+      
+      - name: Run tests
+        shell: bash
+        run: npm run test
+
+      - name: Lint code
+        if: steps.list_env.outputs.eslint != ''
+        run: npm run lint
+
+      - name: Collect code coverage
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: run-${{ matrix.test_number }}
+          parallel: true
+     
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  coverage:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Upload code coverage
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.github_token }}
+        parallel-finished: true      
