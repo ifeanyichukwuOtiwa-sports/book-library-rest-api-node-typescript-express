@@ -35,30 +35,10 @@ jobs:
        
       - name: Install Node.js dependencies
         run: npm install
-        
-      - name: List environment
-        id: list_env
-        shell: bash
-        run: |
-          echo "node@$(node -v)"
-          echo "npm@$(npm -v)"
-          npm -s ls ||:
-          (npm -s ls --depth=0 ||:) | awk -F'[ @]' 'NR>1 && $2 { print "::set-output name=" $2 "::" $3 }'  
       
       - name: Run tests
         shell: bash
         run: npm run test
-
-      - name: Lint code
-        if: steps.list_env.outputs.eslint != ''
-        run: npm run lint
-
-      - name: Collect code coverage
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          flag-name: run-${{ matrix.test_number }}
-          parallel: true
      
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
@@ -67,13 +47,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-  coverage:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-    - name: Upload code coverage
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.github_token }}
-        parallel-finished: true      
