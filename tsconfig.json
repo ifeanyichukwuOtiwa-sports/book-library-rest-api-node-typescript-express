@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "declaration": true,
+    "noImplicitAny": true,
+    "outDir": "./dist",
+    "target": "es2016",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
+    "module": "commonjs",                                /* Specify what module code is generated. */
+    "rootDir": "./src",                                      /* Specify the root folder within your source files. */
+    "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
+    "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
+    "strict": true,                                      /* Enable all strict type-checking options. */
+    "skipLibCheck": true,                                /* Skip type checking all .d.ts files. */
+//    "paths": {
+//      "@app/*": ["./src/app/*"],
+//      "@controller/*": ["./src/app/controller/*"],
+//      "@error/*": ["./src/app/error/*"],
+//      "@models/*": ["./src/app/models/*"],
+//      "@repository/*": ["./src/app/repository/*"],
+//      "@service/*": ["./src/app/service/*"],
+//      "@dto/*": ["./src/app/types/*"]
+//    }
+  },
+  "exclude":  ["node_modules", "dist"]
+}
